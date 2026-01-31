@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>High-throughput backends without latency spikes | Amirhossein Akhlaghpour</title>
+    <meta
+      name="description"
+      content="Practical steps to keep Go services fast under load: GC, memory limits, lock contention, profiling, and tooling."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container topbar">
+        <nav class="tabs">
+          <a href="index.html" class="tab">About</a>
+          <a href="blog.html" class="tab active">Blog</a>
+          <a href="research.html" class="tab">Research</a>
+          <a href="resume.html" class="tab">Experience</a>
+        </nav>
+        <div class="icons">
+          <a href="https://github.com/mehrbod2002" aria-label="GitHub">GitHub</a>
+          <a href="https://www.linkedin.com/in/amirhossein-akhlaghpour-84676392/" aria-label="LinkedIn">LinkedIn</a>
+          <a href="mailto:m9.akhlaghpoor@gmail.com" aria-label="Email">Email</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section">
+        <div class="content">
+          <h1>High-throughput backends without latency spikes</h1>
+          <p class="meta">Dec 2024</p>
+          <p>
+            Building a high-throughput backend in Go is usually a "honeymoon phase" experience.
+            Everything feels fast and light until your traffic spikes, and suddenly your p99 latency
+            starts looking like a mountain range.
+          </p>
+          <p>
+            If you have ever seen your API "stutter" under pressure, you are not alone. Go's
+            concurrency model is world-class, but at a certain scale, the difference between a
+            smooth ride and a bumpy one comes down to how you treat the Go runtime.
+          </p>
+          <p>
+            Let's look at how to keep your services lightning-fast and your latency curves flat.
+          </p>
+
+          <h3>1) Be kind to the Garbage Collector (GC)</h3>
+          <p>
+            Go's GC is incredibly smart, but it is a bit like a roommate who cleans up after you:
+            the more mess you make, the more often they have to stop what they are doing to tidy up.
+            In Go, "mess" equals heap allocations.
+          </p>
+          <p><strong>The secret weapon:</strong> use <code>sync.Pool</code>.</p>
+          <p>
+            Why it works: instead of throwing away a "used" object (like a byte buffer) and asking
+            for a brand-new one, you put it in a pool. Next time you need one, you just grab it from
+            the pool. This keeps the GC from having to work overtime.
+          </p>
+          <p>
+            Quick tip: want to see where your "mess" is coming from? Run
+            <code>go build -gcflags="-m"</code> to see your code's escape analysis. It will tell you
+            exactly which variables are escaping to the heap.
+          </p>
+
+          <h3>2) Give your app some boundaries</h3>
+          <p>
+            Since Go 1.19, we have two dials we can turn to keep things stable:
+          </p>
+          <p><strong>GOMEMLIMIT:</strong> a soft ceiling. Set it to about 80-90% of your container's limit.</p>
+          <p><strong>GOGC:</strong> controls how aggressive the GC is. If you have RAM to spare, raise it (for example, 200).</p>
+
+          <h3>3) Don't let locks slow you down</h3>
+          <p>
+            High throughput means lots of goroutines trying to talk at once. If they are all fighting
+            over a single <code>sync.Mutex</code>, they will queue up and stall.
+          </p>
+          <p>
+            The fix: sharding. Instead of one giant map with one giant lock, break your data into
+            16 or 32 smaller buckets, each with its own lock.
+          </p>
+          <p>
+            For simple counters, skip the lock entirely and use the <code>sync/atomic</code> package.
+          </p>
+
+          <h3>4) Pick the right tools for the job</h3>
+          <p>When the load is heavy, specialized tools can help.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Recommendation</th>
+                <th>Why</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>JSON</td>
+                <td>segmentio/encoding/json</td>
+                <td>Faster than the standard library for heavy loads.</td>
+              </tr>
+              <tr>
+                <td>I/O</td>
+                <td>bufio.Writer</td>
+                <td>Batches small writes to reduce overhead.</td>
+              </tr>
+              <tr>
+                <td>Timeouts</td>
+                <td>context.WithTimeout</td>
+                <td>Prevents requests from hanging forever.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>5) Use the X-ray (pprof)</h3>
+          <p>
+            Guessing is hard mode. Go's built-in profiler, <code>pprof</code>, shows exactly where CPU
+            and memory are going. Run it during load tests to find the real bottleneck.
+          </p>
+
+          <h3>The steady-state checklist</h3>
+          <ul>
+            <li>Reuse memory with <code>sync.Pool</code>.</li>
+            <li>Respect memory limits with <code>GOMEMLIMIT</code>.</li>
+            <li>Reduce lock contention with sharding or atomics.</li>
+            <li>Review performance regularly with <code>pprof</code>.</li>
+          </ul>
+
+          <p>
+            High performance does not have to be a headache. With a few tweaks to how you handle
+            memory and concurrency, you can keep your Go backends running smooth as silk.
+          </p>
+          <p><a href="blog.html">Back to Blog</a></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="content footer-content">
+        <div>
+          <a href="mailto:m9.akhlaghpoor@gmail.com">m9.akhlaghpoor@gmail.com</a>
+          <button class="copy" type="button" data-copy="m9.akhlaghpoor@gmail.com">Copy</button>
+          <span>•</span>
+          <a href="tel:+447367046857">+44 7367 046857</a>
+          <button class="copy" type="button" data-copy="+447367046857">Copy</button>
+        </div>
+        <div class="footer-meta">Built with HTML, CSS, Mermaid.js. Lighthouse Score: 100/100.</div>
+      </div>
+    </footer>
+    <script type="module">
+      document.querySelectorAll("[data-copy]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const value = button.getAttribute("data-copy");
+          try {
+            await navigator.clipboard.writeText(value);
+            const previous = button.textContent;
+            button.textContent = "Copied";
+            setTimeout(() => {
+              button.textContent = previous;
+            }, 1200);
+          } catch (error) {
+            console.error(error);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

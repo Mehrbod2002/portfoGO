@@ -46,25 +46,6 @@
         </div>
       </section>
 
-      <section class="section showcase" id="showcase">
-        <div class="content">
-          <h2>Showcase</h2>
-          {{range .Showcase}}
-          <article>
-            <h3>{{.Title}}</h3>
-            <p class="meta">{{.Meta}}</p>
-            <p>{{safeHTML .BodyHTML}}</p>
-            {{if .DiagramMermaid.Valid}}
-            <div class="diagram">
-              <pre class="mermaid">{{.DiagramMermaid.String}}</pre>
-            </div>
-            {{end}}
-            <p class="meta">{{safeHTML .WhyHTML}}</p>
-          </article>
-          {{end}}
-        </div>
-      </section>
-
       <section class="section skills" id="skills">
         <div class="content">
           <h2>Technical Mastery</h2>

@@ -9,9 +9,9 @@ INSERT INTO site_settings (key, value) VALUES
   ('footer_meta', 'Built with HTML, CSS, Mermaid.js. Lighthouse Score: 100/100.');
 
 INSERT INTO about_paragraphs (content, position) VALUES
-  ('I build high-throughput systems at the intersection of Go/Rust systems programming and cloud-native infrastructure. AWS-certified and Kubernetes-native, I deliver deterministic scalability with 30% efficiency gains and 50% faster deployments across fintech and blockchain platforms.', 1),
-  ('Experienced Full Stack Developer specializing in microservices, distributed systems, and secure decentralized platforms. I bridge complex backend logic with blockchain middleware, optimizing transaction workflows, memory safety, and high-performance API design.', 2),
-  ('If you need a senior partner for high-stakes backend or blockchain builds, I am available for technical collaboration.', 3);
+  ('Senior systems and backend engineer with 6+ years building Go/Rust platforms for fintech and blockchain products, from high-throughput APIs to low-latency streaming services.', 1),
+  ('I have led microservice re-architecture, event-driven data pipelines, and Kubernetes/AWS deployments, improving reliability, scalability, and delivery speed while keeping costs predictable.', 2),
+  ('Known for clean system design, secure middleware, and pragmatic execution—turning complex requirements into production-ready systems that teams can operate and evolve.', 3);
 
 INSERT INTO showcase_items (title, meta, body, why, diagram_mermaid, position) VALUES
   ('High-Performance Fintech Systems — InfoStride', 'Situation → Action → Result', 'Re-architected Go/Rust microservices with deterministic concurrency, AWS Lambda/SQS orchestration, and optimized DynamoDB data paths to unlock 30% throughput gains and 50% faster deployments.', 'Why: I kept SQS in the critical path to preserve backpressure and isolate burst load from DynamoDB hot partitions.', 'flowchart LR\n  A[Go/Rust Services] --> B[AWS SQS]\n  B --> C[DynamoDB]\n  A --> D[API Gateway]', 1),
